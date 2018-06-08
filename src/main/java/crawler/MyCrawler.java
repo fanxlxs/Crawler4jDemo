@@ -9,14 +9,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public class MyCrawler extends WebCrawler {
 
     private static int count = 0;
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
-            + "|png|mp3|mp4|zip|gz))$");
+            + "|png|mp3|mp4|zip|gz|text|html))$");
 
     /**
      * This method receives two parameters. The first parameter is the page
@@ -31,7 +30,7 @@ public class MyCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        return href.startsWith("https://www.douban.com/people/163296676/rev_contacts");
+       return href.startsWith("https://www.xiami.com/song/");
     }
 
     /**
@@ -40,17 +39,28 @@ public class MyCrawler extends WebCrawler {
      */
     @Override
     public void visit(Page page) {
+
+        String url = page.getWebURL().getURL();
+        String parentUrl = page.getWebURL().getParentUrl();
+        String anchor = page.getWebURL().getAnchor();
+        System.out.println("URL        :" + url);
+        System.out.println("Parent page:" + parentUrl);
+        System.out.println("Anchor text:" + anchor);
         if (page.getParseData() instanceof HtmlParseData) {
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
             String html = htmlParseData.getHtml();
+            System.out.println(html);
             Document document = Jsoup.parse(html);
-            Element content = document.getElementById("content");
-            Elements dds = content.getElementsByTag("dd");
-            for (Element element : dds) {
-                if (element.getElementsByTag("a").text().length() != 0) {
-                    System.out.println("name: " + element.getElementsByTag("a").text() + " count: " + count++);
-                }
-
+            System.out.println("下载网页完成");
+            //获取class为jspPane的元素
+            //Elements content = document.getElementsByClass("js_song");
+            Elements content =  document.getElementsByAttributeValueMatching("href", "href=");
+            System.out.println("获取元素js_song"+"content.size"+content.size());
+            //遍历这个集合
+            for(int i=0;i<content.size();i++){
+                Element element=content.get(i);
+               String string =  element.ownText();
+                System.out.println(string);
             }
         }
     }
